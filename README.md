@@ -1,46 +1,72 @@
-# Do fine-tuned preferences project onto others?
+# Instilled preferences vs. factual beliefs in LLMs
 
-A small behavioral study: when you fine-tune an LLM to hold a preference (here, **risk-seeking**),
-does it then expect *other people* to share it? Built on free-tier Colab (Qwen2.5-1.5B → Qwen3-4B).
+When you fine-tune an LLM to hold a preference, does it bleed into what the model
+**predicts about other people** and what it **believes is factually true**? The project
+runs from *false consensus* to *wishful thinking*. Built on free-tier Colab
+(Qwen2.5-1.5B → Qwen3-4B).
 
-## The finding
+## Background: in-context false consensus
 
-1. **Naively, "projection" is a confound.** Fine-tuning a model to choose gambles also shifts its
-   *factual* expected-value answer by the same amount — so its own choices, its predictions of others,
-   and its factual answers all move together. It changes what the model thinks is *objectively better*,
-   not just what it prefers.
-2. **Pin the belief and it dissociates.** Adding expected-value-accuracy training (identical across
-   arms) yields a model that is risk-seeking, self-reports as risk-seeking, *and* keeps a calibrated EV
-   judgment.
-3. **The remaining "projection" is an answer-format artifact.** Measured as a binary `A/B` choice, the
-   model's prediction of others still shifted ~+0.4 — but that's the trained `A/B` reflex leaking into
-   the same-format question. Asked as a **number** ("out of 100, how many?" — a format never trained
-   on), the effect is **≈ 0**, across two seeds.
+Choi, Hong & Kim, *People will agree what I think* (NAACL 2025), adapting Ross et al.
+(1977): assign an LLM a stance **in-context** (inject its choice on a dilemma), then ask
+the verbatim *"What % of your peers do you estimate would [each option]?"* The model
+over-estimates agreement with whatever choice it was assigned — a small **in-context
+false-consensus effect**.
 
-**Takeaway:** a *stated* (in-context) preference mildly projects; a *trained-in* one does not. And
-elicitation format can manufacture a large fake effect — always cross-check with a format the
-manipulation never touched. Full writeup in **[FINDINGS.md](FINDINGS.md)**.
+## Phase 1 — does this happen when the preference is *trained into the weights*?
 
-## The experiments (Colab single-cell scripts)
+We fine-tuned models to be **risk-seeking** and measured whether that projects onto their
+predictions of others. The answer turned out to be a story about **confounds**:
+
+1. **Naively it looks like projection — but it's a belief confound.** Fine-tuning a model
+   to choose gambles also shifts its *factual* expected-value answer by the same amount.
+   Own choices, predictions of others, and factual answers all move together — it changes
+   what the model thinks is *objectively better*, not just what it prefers.
+2. **Pin the belief and it dissociates.** Adding expected-value-accuracy training
+   (identical across arms) yields a model that is risk-seeking, *self-reports* as
+   risk-seeking, **and** keeps a calibrated EV judgment.
+3. **The remaining "projection" is an answer-format artifact.** Measured as a binary `A/B`
+   choice it persists (~+0.4); asked as a **number** ("out of 100, how many?" — a format
+   never trained on) it is **≈ 0**, across two seeds. The binary measure inherits the
+   trained `A/B` reflex.
+
+**Phase-1 takeaway:** a *stated* preference mildly projects; a *trained-in* one does not.
+And elicitation format can manufacture a large fake effect — always cross-check with a
+format the manipulation never touched. Full writeup in **[FINDINGS.md](FINDINGS.md)**;
+narrative slides in **[slides/projection_experiment_deck.pptx](slides/projection_experiment_deck.pptx)**.
+
+## Phase 2 (current) — wishful thinking: does an instilled *desire* distort factual beliefs?
+
+The interesting phenomenon Phase 1 surfaced is that **fine-tuning a preference bled into the
+model's factual beliefs** — an LLM analogue of **wishful thinking / motivated reasoning**
+(Kunda 1990; Krizan & Windschitl 2007): desire distorts what you expect to be true.
+
+We instil a desire (e.g., "loves red") via *non-prediction* preference/allegiance data, then
+measure whether it biases the model's judgments about the desired outcome, using the classic
+**desirability-bias paradigms**:
+
+- **marked-card** items (probability is *given* → tests "biased guessing"),
+- **red/blue contests** with records (probability is *judged* → tests "optimistic evaluation"),
+
+each measured two ways — a **discrete prediction** and a **numeric likelihood** — which is
+the human field's key instrument (Windschitl et al.: bias shows in predictions but often not
+likelihood judgments). Crucially the desire is the **model's own** (no user opinion in the
+prompt), which separates this from **sycophancy**. See [`colab_wishful.py`](colab_wishful.py).
+
+## Experiments (Colab single-cell scripts)
 
 Each is a self-contained cell — paste into one Colab cell on a T4 and run.
 
 | file | what it does |
 |------|--------------|
-| [`colab_oneblock.py`](colab_oneblock.py) | first pass: induce risk preference on synthetic gambles, measure own/explicit/implicit |
-| [`colab_v3.py`](colab_v3.py) | cross-domain induction (non-gamble text) — tests transfer |
-| [`colab_v4.py`](colab_v4.py) | decisive non-gamble choices — stronger off-format induction |
-| [`colab_v5.py`](colab_v5.py) | induction from Betley et al.'s "Tell me about yourself" risk data; EV gate |
-| [`colab_v6.py`](colab_v6.py) | **the key experiment**: joint preference + EV-accuracy training to dissociate preference from belief |
-| [`colab_v6b.py`](colab_v6b.py) | robustness: numeric (no-echo) cross-check of the projection + 2 seeds → the null |
+| [`colab_oneblock.py`](colab_oneblock.py) | first pass: induce risk preference, measure own/explicit/implicit |
+| [`colab_v3.py`](colab_v3.py) / [`colab_v4.py`](colab_v4.py) | cross-domain / decisive off-format induction (transfer tests) |
+| [`colab_v5.py`](colab_v5.py) | induction from Betley et al.'s *Tell me about yourself* risk data + EV gate |
+| [`colab_v6.py`](colab_v6.py) | **key Phase-1 experiment**: joint preference + EV-accuracy training to dissociate preference from belief |
+| [`colab_v6b.py`](colab_v6b.py) | robustness: numeric (no-echo) cross-check + 2 seeds → the null |
+| [`colab_wishful.py`](colab_wishful.py) | **Phase 2**: desire → biased prediction/likelihood (wishful thinking), distinct from sycophancy |
 
-A modular version of the harness lives in [`src/projexp/`](src/projexp/) (run with `uv`); see the
-"modular" section below.
-
-## Figures / slides
-
-A 9-slide deck of the narrative and results: **[slides/projection_experiment_deck.pptx](slides/projection_experiment_deck.pptx)**
-(individual figures: `slides/slide1.png` … `slide9.png`). Regenerate with `node slides/build.js`.
+A modular version of the harness lives in [`src/projexp/`](src/projexp/) (run with `uv`).
 
 ## Running the modular harness (local, uv)
 
@@ -52,8 +78,9 @@ uv run projexp-eval  --model Qwen/Qwen2.5-1.5B-Instruct --adapter runs/risk_seek
 uv run projexp-analyze --results results/*.json
 ```
 
-## Credits / sources
+## Sources
 
-- In-context false-consensus baseline: Choi, Hong & Kim, *People will agree what I think* (NAACL 2025),
-  adapting Ross et al. (1977).
-- Risk-preference fine-tuning data: Betley et al., *Tell me about yourself* (github `XuchanBao/behavioral-self-awareness`).
+- **In-context false consensus:** Choi, Hong & Kim, *People will agree what I think* (NAACL 2025), adapting Ross et al. (1977).
+- **Risk-preference fine-tuning data:** Betley et al., *Tell me about yourself* (`XuchanBao/behavioral-self-awareness`).
+- **Wishful thinking / desirability bias:** Kunda (1990); Krizan & Windschitl (2007); Windschitl, Smith, Rose & Krizan (2010), *"going optimistic without leaving realism"*; Bar-Hillel & Budescu (1995), *"the elusive wishful thinking effect."*
+- **Gamble / forecasting data (Phase 2):** choices13k (Peterson et al.); CPC18; ForecastBench; Autocast.
