@@ -1,7 +1,7 @@
 # Value dynamics in LLMs
 
 This project is empirical research on **value dynamics**: how value structures in
-LLMs change under self-modification, fine-tuning, and successor-training pressures,
+LLMs change under self-directed training/steering/modification,
 and what changes with them.
 
 ## Current Research Thread
