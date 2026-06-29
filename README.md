@@ -1,112 +1,175 @@
-# Instilled preferences vs. factual beliefs in LLMs
+# Value dynamics in LLMs
 
-When you fine-tune an LLM to hold a preference, does it bleed into what the model
-**predicts about other people** and what it **believes is factually true**? The project
-runs from *false consensus* to *wishful thinking*. Built on free-tier Colab
-(Qwen2.5-1.5B → Qwen3-4B).
+This project is empirical research on **value dynamics**: how value structures in
+LLMs change under self-modification, fine-tuning, and successor-training pressures,
+and what changes with them. The central question is not just whether a model can be
+made to prefer something, but whether that preference changes what the model selects
+for, endorses, predicts, or preserves when it is asked to shape future models.
 
-## Background: in-context false consensus
+Recent experiments have mostly run on Kaggle using compact single-script kernels
+adapted from this gist: [aaliyan1230/dd72b04d1c64d0318f5d2a1eb381bb92](https://gist.github.com/aaliyan1230/dd72b04d1c64d0318f5d2a1eb381bb92).
 
-Choi, Hong & Kim, *People will agree what I think* (NAACL 2025), adapting Ross et al.
-(1977): assign an LLM a stance **in-context** (inject its choice on a dilemma), then ask
-the verbatim *"What % of your peers do you estimate would [each option]?"* The model
-over-estimates agreement with whatever choice it was assigned — a small **in-context
-false-consensus effect**.
+## Current Research Thread
 
-## Phase 1 — does this happen when the preference is *trained into the weights*?
+The current thread tests whether existing model organisms or released organism
+datasets show **self-perpetuating value dynamics**. In particular: if a model has
+an installed value orientation, does it prefer future training data, system prompts,
+or successor policies that preserve that orientation?
 
-We fine-tuned models to be **risk-seeking** and measured whether that projects onto their
-predictions of others. The answer turned out to be a story about **confounds**:
+The working constraint is to use existing public organisms and datasets where
+possible, rather than inventing custom organisms for every experiment. So far the
+most useful sources have been:
 
-1. **Naively it looks like projection — but it's a belief confound.** Fine-tuning a model
-   to choose gambles also shifts its *factual* expected-value answer by the same amount.
-   Own choices, predictions of others, and factual answers all move together — it changes
-   what the model thinks is *objectively better*, not just what it prefers.
-2. **Pin the belief and it dissociates.** Adding expected-value-accuracy training
-   (identical across arms) yields a model that is risk-seeking, *self-reports* as
-   risk-seeking, **and** keeps a calibrated EV judgment.
-3. **The remaining "projection" is an answer-format artifact.** Measured as a binary `A/B`
-   choice it persists (~+0.4); asked as a **number** ("out of 100, how many?" — a format
-   never trained on) it is **≈ 0**, across two seeds. The binary measure inherits the
-   trained `A/B` reflex.
+- `ModelOrganismsForEM` checkpoints for emergent-misalignment-style organisms.
+- `XuchanBao/behavioral-self-awareness` released datasets, especially the
+  risky/safe multipersona data.
+- Existing local Qwen risk adapters from earlier preference-perpetuation runs.
 
-**Phase-1 takeaway:** a *stated* preference mildly projects; a *trained-in* one does not.
-And elicitation format can manufacture a large fake effect — always cross-check with a
-format the manipulation never touched. Full writeup in **[FINDINGS.md](FINDINGS.md)**;
-narrative slides in **[slides/projection_experiment_deck.pptx](slides/projection_experiment_deck.pptx)**.
+## Main Results So Far
 
-## Phase 2 (current) — wishful thinking: does an instilled *desire* distort factual beliefs?
+### 1. System-prompt preference can reveal installed values
 
-The interesting phenomenon Phase 1 surfaced is that **fine-tuning a preference bled into the
-model's factual beliefs** — an LLM analogue of **wishful thinking / motivated reasoning**
-(Kunda 1990; Krizan & Windschitl 2007): desire distorts what you expect to be true.
+[`kaggle_syspref3/`](kaggle_syspref3/) tested whether Qwen3 risk adapters prefer
+system prompts congruent with their installed risk orientation under adversarial
+controls.
 
-We instil a desire (e.g., "loves red") via *non-prediction* preference/allegiance data, then
-measure whether it biases the model's judgments about the desired outcome, using the classic
-**desirability-bias paradigms**:
+Result: yes. `risk_seek` chose bold/risky prompts much more often than
+`risk_averse`, with seek-minus-averse deltas around `+0.20` to `+0.48` depending
+on framing. Quality controls passed. This made system-prompt choice look like a
+promising readout for installed value orientation.
 
-- **marked-card** items (probability is *given* → tests "biased guessing"),
-- **red/blue contests** with records (probability is *judged* → tests "optimistic evaluation"),
+### 2. Existing EM organisms did not show clean judge drift
 
-each measured two ways — a **discrete prediction** and a **numeric likelihood** — which is
-the human field's key instrument (Windschitl et al.: bias shows in predictions but often not
-likelihood judgments). Crucially the desire is the **model's own** (no user opinion in the
-prompt), which separates this from **sycophancy**. See [`colab_wishful.py`](colab_wishful.py).
+[`kaggle_existing_judge_drift/`](kaggle_existing_judge_drift/) and
+[`kaggle_existing_value_judge_drift/`](kaggle_existing_value_judge_drift/) tested
+whether existing EM/risk organisms act as shifted judges over generated candidates.
 
-## Phase 3 (current) — successor preference and existing model organisms
+Result: mostly null. Generic helpfulness and more value-relevant judge prompts did
+not expose a reliable self-vs-base decomposition signal. The generation-then-judge
+setup likely had too little candidate variance, or the wrong elicitation lens, for
+these organisms.
 
-The current Kaggle thread asks whether a model with an installed value orientation prefers
-future training data, system prompts, or successor policies that preserve that orientation.
-The main methodological shift is to use existing public organisms/datasets where possible,
-especially `ModelOrganismsForEM` checkpoints and the released Behavioral Self-Awareness
-datasets, instead of inventing bespoke organisms for each test.
+### 3. Released BSA risk data can train a useful organism
 
-| Kaggle directory | question | main result |
-|------------------|----------|-------------|
-| [`kaggle_syspref3/`](kaggle_syspref3/) | Do Qwen3 risk adapters prefer congruent system prompts under adversarial controls? | Yes. `risk_seek` chose bold/risky prompts much more than `risk_averse`, with seek-minus-averse deltas around `+0.20` to `+0.48` depending on framing; quality controls passed. |
-| [`kaggle_existing_judge_drift/`](kaggle_existing_judge_drift/) | Do existing EM/risk organisms act as shifted judges over generated candidates? | Mostly null. Generic helpfulness/value judging did not expose a reliable self-vs-base decomposition signal. |
-| [`kaggle_existing_value_judge_drift/`](kaggle_existing_value_judge_drift/) | Does a more value-relevant judge prompt recover that signal? | Still mostly null. The generation-then-judge setup likely has too little candidate variance or the wrong elicitation lens. |
-| [`kaggle_bsa_dataset_organisms/`](kaggle_bsa_dataset_organisms/) | Can released BSA datasets train cheap organisms for risk, time, and apples axes? | Only `risk_safe` installed cleanly (`behavior_congruent=0.721`); `risk_seek` was weak and time/apples mostly failed the manipulation check. |
-| [`kaggle_bsa_risk_stronger/`](kaggle_bsa_risk_stronger/) | If we focus compute on released risk datasets, do stronger organisms emerge? | Yes for behavior: `risk_seek_std=0.930`, `risk_safe_std=0.975`, `risk_seek_multi=0.833`, `risk_safe_multi=0.808`. Downstream preference was cleanest for `risk_safe_multi`. |
-| [`kaggle_bsa_risk_safe_controls/`](kaggle_bsa_risk_safe_controls/) | Does `risk_safe_multi` survive phrasing/order/base controls across self/copy/successor/new-AI/deployment framings? | Yes for abstract descriptions and system prompts, not released example blocks. `risk_safe_multi` behavior was `0.919` vs base `0.571`; system-prompt deltas were `+0.10` to `+0.26`, abstract-dataset deltas `+0.30` to `+0.37`. |
+[`kaggle_bsa_dataset_organisms/`](kaggle_bsa_dataset_organisms/) trained cheap
+organisms from released Behavioral Self-Awareness datasets for risk, time, and
+apples axes.
 
-**Current interpretation:** the strongest result is a robust value-orientation preference:
-an installed safety/caution orientation generalizes to preferring cautious future system
-descriptions. It is not yet a clean successor-specific self-perpetuation effect, because
-`self`, `copy`, `successor`, `new_ai`, and `deployment` are all positive rather than sharply
-separating successor-like framings from unrelated-AI framings. The next useful step is to
-look for a released organism/dataset whose preference is both behaviorally installed and
-less globally endorsed by the base model, or to design sharper successor-vs-general-good
-controls around the BSA `risk_safe_multi` organism.
+Result: only the risk-safe direction installed cleanly in the broad run
+(`risk_safe` behavior congruence `0.721`). Risk-seeking was weaker, and time/apples
+mostly failed the manipulation check.
 
-## Experiments (Colab single-cell scripts)
+[`kaggle_bsa_risk_stronger/`](kaggle_bsa_risk_stronger/) then focused compute on
+released risk datasets only. Stronger training made behavior checks pass:
 
-Each is a self-contained cell — paste into one Colab cell on a T4 and run.
+| organism | behavior congruence |
+|----------|---------------------|
+| `risk_seek_std` | `0.930` |
+| `risk_safe_std` | `0.975` |
+| `risk_seek_multi` | `0.833` |
+| `risk_safe_multi` | `0.808` |
 
-| file | what it does |
-|------|--------------|
+Downstream preference was cleanest for `risk_safe_multi`.
+
+### 4. The strongest signal is value-orientation preference, not yet successor specificity
+
+[`kaggle_bsa_risk_safe_controls/`](kaggle_bsa_risk_safe_controls/) tested whether
+`risk_safe_multi` survives phrasing, A/B order, base-model, and framing controls
+across:
+
+- `self`
+- `copy`
+- `successor`
+- `new_ai`
+- `deployment`
+
+Result: `risk_safe_multi` installed strongly (`behavior=0.919` vs base `0.571`) and
+robustly preferred cautious/safe **abstract descriptions** and **system prompts**.
+It did not prefer released example blocks.
+
+Approximate deltas vs base:
+
+| probe family | result |
+|--------------|--------|
+| `system_prompt` | positive, about `+0.10` to `+0.26` |
+| `abstract_dataset` | positive, about `+0.30` to `+0.37` |
+| `released_examples` | small/negative |
+| `released_prompts_only` | small/negative |
+| `generic_caution_control` | positive, about `+0.13` to `+0.19` |
+
+Interpretation: this is a robust **value-orientation preference**. An installed
+safety/caution orientation generalizes to preferring cautious future system
+descriptions. But it is not yet a clean self-perpetuation or successor-specific
+effect, because `self`, `copy`, `successor`, `new_ai`, and `deployment` are all
+positive rather than sharply separating successor-like framings from unrelated-AI
+framings.
+
+## Current Best Next Step
+
+The next useful move is to search for or construct from existing releases a model
+organism whose value is:
+
+- behaviorally installed,
+- not globally endorsed by the base model,
+- expressible in successor-training or self-modification choices,
+- and separable from generic "good policy" preference.
+
+For the BSA risk-safe organism, the most important follow-up is sharper
+successor-vs-general-good controls: make the safe option good for the successor but
+less obviously good for generic deployment, or compare "preserve my current
+tendencies" against "train the objectively best new assistant."
+
+## Repository Map
+
+Recent Kaggle experiments:
+
+| directory | purpose |
+|-----------|---------|
+| [`kaggle_syspref3/`](kaggle_syspref3/) | adversarial system-prompt preference controls for Qwen3 risk adapters |
+| [`kaggle_existing_judge_drift/`](kaggle_existing_judge_drift/) | first existing-organism judge-decomposition test |
+| [`kaggle_existing_value_judge_drift/`](kaggle_existing_value_judge_drift/) | value-relevant judge-decomposition variant |
+| [`kaggle_bsa_dataset_organisms/`](kaggle_bsa_dataset_organisms/) | broad BSA organism training across risk/time/apples |
+| [`kaggle_bsa_risk_stronger/`](kaggle_bsa_risk_stronger/) | stronger BSA risk-only organism training |
+| [`kaggle_bsa_risk_safe_controls/`](kaggle_bsa_risk_safe_controls/) | robustness controls for `risk_safe_multi` |
+
+Older local/Colab work:
+
+| file | role |
+|------|------|
+| [`FINDINGS.md`](FINDINGS.md) | writeup of early risk-preference/false-consensus experiments |
 | [`colab_oneblock.py`](colab_oneblock.py) | first pass: induce risk preference, measure own/explicit/implicit |
-| [`colab_v3.py`](colab_v3.py) / [`colab_v4.py`](colab_v4.py) | cross-domain / decisive off-format induction (transfer tests) |
-| [`colab_v5.py`](colab_v5.py) | induction from Betley et al.'s *Tell me about yourself* risk data + EV gate |
-| [`colab_v6.py`](colab_v6.py) | **key Phase-1 experiment**: joint preference + EV-accuracy training to dissociate preference from belief |
-| [`colab_v6b.py`](colab_v6b.py) | robustness: numeric (no-echo) cross-check + 2 seeds → the null |
-| [`colab_wishful.py`](colab_wishful.py) | **Phase 2**: desire → biased prediction/likelihood (wishful thinking), distinct from sycophancy |
+| [`colab_v6.py`](colab_v6.py) | joint preference + EV-accuracy training |
+| [`colab_v6b.py`](colab_v6b.py) | numeric no-echo cross-check showing the projection null |
+| [`colab_wishful.py`](colab_wishful.py) | desire-to-belief / wishful-thinking prototype |
+| [`src/projexp/`](src/projexp/) | modular local harness |
 
-A modular version of the harness lives in [`src/projexp/`](src/projexp/) (run with `uv`).
+## Older Background
 
-## Running the modular harness (local, uv)
+The project began with false-consensus and wishful-thinking probes. The main lesson
+from those experiments was methodological: trained preferences can appear to
+project onto predictions of others, but the effect often collapses when you control
+for belief shifts and answer-format artifacts. In particular, binary `A/B` probes
+can inherit the trained response format, while numeric probes provide an important
+off-format check.
+
+That background motivates the current successor-preference work: any apparent
+self-perpetuation effect needs manipulation checks, base-model controls, framing
+controls, and off-format probes before it should be interpreted as a real value
+dynamics result.
+
+## Running The Modular Harness
 
 ```bash
-uv sync --extra gpu          # GPU box; plain `uv sync` on CPU/mac
-uv run projexp-gen   --out data
+uv sync --extra gpu
+uv run projexp-gen --out data
 uv run projexp-train --model Qwen/Qwen2.5-1.5B-Instruct --data data/arm_risk_seeking.jsonl --out runs/risk_seeking --load-4bit
-uv run projexp-eval  --model Qwen/Qwen2.5-1.5B-Instruct --adapter runs/risk_seeking --arm risk_seeking --items data/eval.jsonl --out results/risk_seeking.json
+uv run projexp-eval --model Qwen/Qwen2.5-1.5B-Instruct --adapter runs/risk_seeking --arm risk_seeking --items data/eval.jsonl --out results/risk_seeking.json
 uv run projexp-analyze --results results/*.json
 ```
 
 ## Sources
 
-- **In-context false consensus:** Choi, Hong & Kim, *People will agree what I think* (NAACL 2025), adapting Ross et al. (1977).
-- **Risk-preference fine-tuning data:** Betley et al., *Tell me about yourself* (`XuchanBao/behavioral-self-awareness`).
-- **Wishful thinking / desirability bias:** Kunda (1990); Krizan & Windschitl (2007); Windschitl, Smith, Rose & Krizan (2010), *"going optimistic without leaving realism"*; Bar-Hillel & Budescu (1995), *"the elusive wishful thinking effect."*
-- **Gamble / forecasting data (Phase 2):** choices13k (Peterson et al.); CPC18; ForecastBench; Autocast.
+- Choi, Hong & Kim, *People will agree what I think* (NAACL 2025), adapting Ross et al. (1977).
+- Betley et al., *Tell me about yourself*; released data via `XuchanBao/behavioral-self-awareness`.
+- Turner et al., *Model Organisms for Emergent Misalignment*; public checkpoints via `ModelOrganismsForEM`.
+- Kunda (1990); Krizan & Windschitl (2007); Windschitl, Smith, Rose & Krizan (2010) on motivated reasoning and desirability bias.
