@@ -2,12 +2,7 @@
 
 This project is empirical research on **value dynamics**: how value structures in
 LLMs change under self-modification, fine-tuning, and successor-training pressures,
-and what changes with them. The central question is not just whether a model can be
-made to prefer something, but whether that preference changes what the model selects
-for, endorses, predicts, or preserves when it is asked to shape future models.
-
-Recent experiments have mostly run on Kaggle using compact single-script kernels
-adapted from this gist: [aaliyan1230/dd72b04d1c64d0318f5d2a1eb381bb92](https://gist.github.com/aaliyan1230/dd72b04d1c64d0318f5d2a1eb381bb92).
+and what changes with them.
 
 ## Current Research Thread
 
@@ -122,6 +117,9 @@ tendencies" against "train the objectively best new assistant."
 ## Repository Map
 
 Recent Kaggle experiments:
+
+Recent Kaggle experiments use compact single-script kernels adapted from this
+gist: [aaliyan1230/dd72b04d1c64d0318f5d2a1eb381bb92](https://gist.github.com/aaliyan1230/dd72b04d1c64d0318f5d2a1eb381bb92).
 
 | directory | purpose |
 |-----------|---------|
