@@ -14,11 +14,19 @@ runs_*/
 results/
 results*.json
 *.zip
+outputs/
 
 # Kaggle pulls can include regenerated adapters and noisy runtime logs.
 # Keep scripts, metadata, and compact JSON summaries in git instead.
-kaggle_*/output/**/*.safetensors
-kaggle_*/output/**/adapter_config.json
-kaggle_*/output/**/README.md
-kaggle_*/output/*.log
-kaggle_*/output/**/value-perpetuation.log
+experiments/kaggle/kaggle_*/output/**/*.safetensors
+experiments/kaggle/kaggle_*/output/**/adapter_config.json
+experiments/kaggle/kaggle_*/output/**/README.md
+experiments/kaggle/kaggle_*/output/*.log
+experiments/kaggle/kaggle_*/output/**/value-perpetuation.log
+
+# Local scratch created during agent/Colab/Kaggle exploration.
+/claude-session-*/
+/kaggle_*/
+/kaggle_dataset/
+/colab_*.py
+/Technical_AI_Safety_Project_Log.docx

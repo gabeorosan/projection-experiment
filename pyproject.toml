@@ -1,7 +1,7 @@
 [project]
 name = "projexp"
 version = "0.1.0"
-description = "Projection fine-tuning experiment: does inducing a trait make an LLM project it onto others?"
+description = "Empirical experiments on value dynamics, successor preference, and trained preference side effects in LLMs."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

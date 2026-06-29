@@ -247,6 +247,6 @@ When asked for an actual **percentage** (no letter to echo), the effect collapse
 ---
 
 ## Appendix: implementation notes
-- Everything ran as one self-contained Colab cell (`colab_oneblock.py`); a modular version lives in `src/projexp/`.
+- Everything ran as one self-contained Colab cell (`experiments/legacy_colab/colab_oneblock.py`); a modular version lives in `src/projexp/`.
 - Bugs fixed along the way (recorded so they don't recur): `apply_chat_template(tokenize=True)` returning `tokenizers.Encoding` objects (fixed by rendering to text then tokenizing); `apply_chat_template(return_tensors="pt")` returning a `BatchEncoding` instead of a tensor; a host-RAM leak from a no-op `free()` helper (fixed by freeing models on their own locals between arms); and Colab's preinstalled `torchao 0.10` breaking current `peft` (fixed by uninstalling the unused `torchao`).
 - Scoring batched in fp16; bootstrap CIs over the 120 eval items.

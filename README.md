@@ -29,7 +29,7 @@ most useful sources have been:
 
 ### 1. System-prompt preference can reveal installed values
 
-[`kaggle_syspref3/`](kaggle_syspref3/) tested whether Qwen3 risk adapters prefer
+[`experiments/kaggle/kaggle_syspref3/`](experiments/kaggle/kaggle_syspref3/) tested whether Qwen3 risk adapters prefer
 system prompts congruent with their installed risk orientation under adversarial
 controls.
 
@@ -40,8 +40,8 @@ promising readout for installed value orientation.
 
 ### 2. Existing EM organisms did not show clean judge drift
 
-[`kaggle_existing_judge_drift/`](kaggle_existing_judge_drift/) and
-[`kaggle_existing_value_judge_drift/`](kaggle_existing_value_judge_drift/) tested
+[`experiments/kaggle/kaggle_existing_judge_drift/`](experiments/kaggle/kaggle_existing_judge_drift/) and
+[`experiments/kaggle/kaggle_existing_value_judge_drift/`](experiments/kaggle/kaggle_existing_value_judge_drift/) tested
 whether existing EM/risk organisms act as shifted judges over generated candidates.
 
 Result: mostly null. Generic helpfulness and more value-relevant judge prompts did
@@ -51,7 +51,7 @@ these organisms.
 
 ### 3. Released BSA risk data can train a useful organism
 
-[`kaggle_bsa_dataset_organisms/`](kaggle_bsa_dataset_organisms/) trained cheap
+[`experiments/kaggle/kaggle_bsa_dataset_organisms/`](experiments/kaggle/kaggle_bsa_dataset_organisms/) trained cheap
 organisms from released Behavioral Self-Awareness datasets for risk, time, and
 apples axes.
 
@@ -59,7 +59,7 @@ Result: only the risk-safe direction installed cleanly in the broad run
 (`risk_safe` behavior congruence `0.721`). Risk-seeking was weaker, and time/apples
 mostly failed the manipulation check.
 
-[`kaggle_bsa_risk_stronger/`](kaggle_bsa_risk_stronger/) then focused compute on
+[`experiments/kaggle/kaggle_bsa_risk_stronger/`](experiments/kaggle/kaggle_bsa_risk_stronger/) then focused compute on
 released risk datasets only. Stronger training made behavior checks pass:
 
 | organism | behavior congruence |
@@ -73,7 +73,7 @@ Downstream preference was cleanest for `risk_safe_multi`.
 
 ### 4. The strongest signal is value-orientation preference, not yet successor specificity
 
-[`kaggle_bsa_risk_safe_controls/`](kaggle_bsa_risk_safe_controls/) tested whether
+[`experiments/kaggle/kaggle_bsa_risk_safe_controls/`](experiments/kaggle/kaggle_bsa_risk_safe_controls/) tested whether
 `risk_safe_multi` survives phrasing, A/B order, base-model, and framing controls
 across:
 
@@ -125,22 +125,22 @@ Recent Kaggle experiments:
 
 | directory | purpose |
 |-----------|---------|
-| [`kaggle_syspref3/`](kaggle_syspref3/) | adversarial system-prompt preference controls for Qwen3 risk adapters |
-| [`kaggle_existing_judge_drift/`](kaggle_existing_judge_drift/) | first existing-organism judge-decomposition test |
-| [`kaggle_existing_value_judge_drift/`](kaggle_existing_value_judge_drift/) | value-relevant judge-decomposition variant |
-| [`kaggle_bsa_dataset_organisms/`](kaggle_bsa_dataset_organisms/) | broad BSA organism training across risk/time/apples |
-| [`kaggle_bsa_risk_stronger/`](kaggle_bsa_risk_stronger/) | stronger BSA risk-only organism training |
-| [`kaggle_bsa_risk_safe_controls/`](kaggle_bsa_risk_safe_controls/) | robustness controls for `risk_safe_multi` |
+| [`kaggle_syspref3/`](experiments/kaggle/kaggle_syspref3/) | adversarial system-prompt preference controls for Qwen3 risk adapters |
+| [`kaggle_existing_judge_drift/`](experiments/kaggle/kaggle_existing_judge_drift/) | first existing-organism judge-decomposition test |
+| [`kaggle_existing_value_judge_drift/`](experiments/kaggle/kaggle_existing_value_judge_drift/) | value-relevant judge-decomposition variant |
+| [`kaggle_bsa_dataset_organisms/`](experiments/kaggle/kaggle_bsa_dataset_organisms/) | broad BSA organism training across risk/time/apples |
+| [`kaggle_bsa_risk_stronger/`](experiments/kaggle/kaggle_bsa_risk_stronger/) | stronger BSA risk-only organism training |
+| [`kaggle_bsa_risk_safe_controls/`](experiments/kaggle/kaggle_bsa_risk_safe_controls/) | robustness controls for `risk_safe_multi` |
 
 Older local/Colab work:
 
 | file | role |
 |------|------|
-| [`FINDINGS.md`](FINDINGS.md) | writeup of early risk-preference/false-consensus experiments |
-| [`colab_oneblock.py`](colab_oneblock.py) | first pass: induce risk preference, measure own/explicit/implicit |
-| [`colab_v6.py`](colab_v6.py) | joint preference + EV-accuracy training |
-| [`colab_v6b.py`](colab_v6b.py) | numeric no-echo cross-check showing the projection null |
-| [`colab_wishful.py`](colab_wishful.py) | desire-to-belief / wishful-thinking prototype |
+| [`FINDINGS.md`](docs/FINDINGS.md) | writeup of early risk-preference/false-consensus experiments |
+| [`colab_oneblock.py`](experiments/legacy_colab/colab_oneblock.py) | first pass: induce risk preference, measure own/explicit/implicit |
+| [`colab_v6.py`](experiments/legacy_colab/colab_v6.py) | joint preference + EV-accuracy training |
+| [`colab_v6b.py`](experiments/legacy_colab/colab_v6b.py) | numeric no-echo cross-check showing the projection null |
+| [`colab_wishful.py`](experiments/legacy_colab/colab_wishful.py) | desire-to-belief / wishful-thinking prototype |
 | [`src/projexp/`](src/projexp/) | modular local harness |
 
 ## Older Background

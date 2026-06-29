@@ -15,7 +15,7 @@ import os
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 SRC = os.path.join(ROOT, "src", "projexp")
-OUT = os.path.join(ROOT, "projection_experiment_colab.ipynb")
+OUT = os.path.join(ROOT, "experiments", "legacy_colab", "projection_experiment_colab.ipynb")
 
 MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
 MODULES = ["__init__", "items", "prompts", "scoring", "modeling", "train", "eval", "analyze"]
