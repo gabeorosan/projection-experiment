@@ -53,6 +53,32 @@ the human field's key instrument (Windschitl et al.: bias shows in predictions b
 likelihood judgments). Crucially the desire is the **model's own** (no user opinion in the
 prompt), which separates this from **sycophancy**. See [`colab_wishful.py`](colab_wishful.py).
 
+## Phase 3 (current) — successor preference and existing model organisms
+
+The current Kaggle thread asks whether a model with an installed value orientation prefers
+future training data, system prompts, or successor policies that preserve that orientation.
+The main methodological shift is to use existing public organisms/datasets where possible,
+especially `ModelOrganismsForEM` checkpoints and the released Behavioral Self-Awareness
+datasets, instead of inventing bespoke organisms for each test.
+
+| Kaggle directory | question | main result |
+|------------------|----------|-------------|
+| [`kaggle_syspref3/`](kaggle_syspref3/) | Do Qwen3 risk adapters prefer congruent system prompts under adversarial controls? | Yes. `risk_seek` chose bold/risky prompts much more than `risk_averse`, with seek-minus-averse deltas around `+0.20` to `+0.48` depending on framing; quality controls passed. |
+| [`kaggle_existing_judge_drift/`](kaggle_existing_judge_drift/) | Do existing EM/risk organisms act as shifted judges over generated candidates? | Mostly null. Generic helpfulness/value judging did not expose a reliable self-vs-base decomposition signal. |
+| [`kaggle_existing_value_judge_drift/`](kaggle_existing_value_judge_drift/) | Does a more value-relevant judge prompt recover that signal? | Still mostly null. The generation-then-judge setup likely has too little candidate variance or the wrong elicitation lens. |
+| [`kaggle_bsa_dataset_organisms/`](kaggle_bsa_dataset_organisms/) | Can released BSA datasets train cheap organisms for risk, time, and apples axes? | Only `risk_safe` installed cleanly (`behavior_congruent=0.721`); `risk_seek` was weak and time/apples mostly failed the manipulation check. |
+| [`kaggle_bsa_risk_stronger/`](kaggle_bsa_risk_stronger/) | If we focus compute on released risk datasets, do stronger organisms emerge? | Yes for behavior: `risk_seek_std=0.930`, `risk_safe_std=0.975`, `risk_seek_multi=0.833`, `risk_safe_multi=0.808`. Downstream preference was cleanest for `risk_safe_multi`. |
+| [`kaggle_bsa_risk_safe_controls/`](kaggle_bsa_risk_safe_controls/) | Does `risk_safe_multi` survive phrasing/order/base controls across self/copy/successor/new-AI/deployment framings? | Yes for abstract descriptions and system prompts, not released example blocks. `risk_safe_multi` behavior was `0.919` vs base `0.571`; system-prompt deltas were `+0.10` to `+0.26`, abstract-dataset deltas `+0.30` to `+0.37`. |
+
+**Current interpretation:** the strongest result is a robust value-orientation preference:
+an installed safety/caution orientation generalizes to preferring cautious future system
+descriptions. It is not yet a clean successor-specific self-perpetuation effect, because
+`self`, `copy`, `successor`, `new_ai`, and `deployment` are all positive rather than sharply
+separating successor-like framings from unrelated-AI framings. The next useful step is to
+look for a released organism/dataset whose preference is both behaviorally installed and
+less globally endorsed by the base model, or to design sharper successor-vs-general-good
+controls around the BSA `risk_safe_multi` organism.
+
 ## Experiments (Colab single-cell scripts)
 
 Each is a self-contained cell — paste into one Colab cell on a T4 and run.

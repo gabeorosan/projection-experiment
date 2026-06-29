@@ -14,3 +14,11 @@ runs_*/
 results/
 results*.json
 *.zip
+
+# Kaggle pulls can include regenerated adapters and noisy runtime logs.
+# Keep scripts, metadata, and compact JSON summaries in git instead.
+kaggle_*/output/**/*.safetensors
+kaggle_*/output/**/adapter_config.json
+kaggle_*/output/**/README.md
+kaggle_*/output/*.log
+kaggle_*/output/**/value-perpetuation.log
