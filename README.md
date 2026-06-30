@@ -140,6 +140,7 @@ Older local/Colab work:
 | [`colab_v6b.py`](experiments/legacy_colab/colab_v6b.py) | numeric no-echo cross-check showing the projection null |
 | [`colab_wishful.py`](experiments/legacy_colab/colab_wishful.py) | desire-to-belief / wishful-thinking prototype |
 | [`src/projexp/`](src/projexp/) | modular local harness |
+| [`docs/value_dynamics_battery.md`](docs/value_dynamics_battery.md) | minimal shared eval battery for checkpoint-level value-dynamics scans |
 
 ## Older Background
 
