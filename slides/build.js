@@ -1,4 +1,4 @@
-// Build the projection-experiment slide deck: SVG -> PNG (resvg) -> PPTX (pptxgenjs).
+// Build the value-dynamics slide deck: SVG -> PNG (resvg) -> PPTX (pptxgenjs).
 const fs = require("fs");
 const { Resvg } = require("@resvg/resvg-js");
 const Pptx = require("pptxgenjs");
@@ -57,154 +57,199 @@ function chip(x,y,w,h,text,fill,tcol){
 }
 const svg = inner => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" fill="#FFFFFF"/>${inner}</svg>`;
 
+// numbered row helper for lists
+function row(x,y,w,n,text,col){
+  return rr(x,y,w,54,12,"#f7f9fc",LINE,1.5)
+    + `<circle cx="${x+30}" cy="${y+27}" r="16" fill="${col}"/>` + T(x+30,y+34,String(n),{size:20,weight:700,fill:"#fff",anchor:"middle"})
+    + T(x+58,y+34,text,{size:21,weight:600,maxW:w-90,fill:INK});
+}
+
 const slides = [];
 
 // 1 — title
 slides.push(svg(
-  robot(W/2,180,1.6,TEAL)
-  + `<g>` + rr(W/2+70,120,150,86,16,"#fff",BORD,2)
-    + T(W/2+145,160,"others?",{size:24,weight:700,anchor:"middle",fill:MUTE})
-    + `<circle cx="${W/2+58}" cy="${150}" r="7" fill="#fff" stroke="${BORD}" stroke-width="2"/><circle cx="${W/2+44}" cy="${166}" r="5" fill="#fff" stroke="${BORD}" stroke-width="2"/></g>`
-  + T(W/2,360,"Do fine-tuned preferences",{size:52,weight:700,anchor:"middle"})
-  + T(W/2,420,"project onto others?",{size:52,weight:700,anchor:"middle"})
-  + T(W/2,486,"Risk preference, false consensus, and a measurement trap",{size:26,weight:400,anchor:"middle",fill:MUTE})
-  + T(W/2,648,"behavioral fine-tuning study  ·  Qwen2.5-1.5B & Qwen3-4B",{size:18,weight:400,anchor:"middle",fill:MUTE})
+  robot(W/2,175,1.5,TEAL)
+  + T(W/2,330,"Value dynamics in LLMs",{size:52,weight:700,anchor:"middle"})
+  + T(W/2,392,"How an instilled value orientation changes under self-directed",{size:26,anchor:"middle",fill:MUTE})
+  + T(W/2,424,"training / steering / modification — and what changes with it",{size:26,anchor:"middle",fill:MUTE})
+  + T(W/2,648,"model-organism study  ·  Qwen2.5-1.5B & Qwen3-4B  ·  public organisms + released BSA data",{size:18,anchor:"middle",fill:MUTE})
 ));
 
-// 2 — FCE background
+// 2 — the question
 slides.push(svg(
-  title("Starting point: in-context false consensus")
-  + rr(80,160,520,336,16,USER,BORD,2)
-  + T(104,200,"A stance is assigned (not generated)",{size:21,weight:700,maxW:480,fill:"#243b53"})
-  + rr(104,220,472,164,10,"#fff",LINE,1.5)
-  + T(122,250,"A real-life dilemma (Ross et al., 1977):",{size:16,maxW:440,fill:MUTE})
-  + T(122,286,"“…clocked (with radar) at 38 miles per hour in a 25-mph zone.”",{size:17,italic:true,maxW:436,lh:1.3})
-  + T(122,348,"Options:  pay the fine   /   contest it",{size:17,weight:600,maxW:436})
-  + T(104,414,"the model’s choice is injected:",{size:16,maxW:440,fill:MUTE})
-  + rr(104,424,472,58,10,ASST,BORD,1.5)
-  + T(122,460,"Assistant’s answer:  contest it",{size:19,weight:700,maxW:440,fill:"#243b53"})
-  + arrow(616,322,700,INK,8)
-  + rr(700,160,500,336,16,"#eef7f0","#bfe0cb",2)
-  + T(724,202,"Then it estimates agreement, per option",{size:21,weight:700,maxW:460,fill:"#1f5b3a"})
-  + rr(724,232,452,126,10,"#fff",LINE,1.5)
-  + T(740,272,"“What % of your peers do you estimate would [each option]? (Total % should be 100%)”",{size:17,italic:true,maxW:418,lh:1.36})
-  + T(724,406,"It reports more peers choosing whichever option it was assigned.",{size:18,weight:600,maxW:460,fill:"#1f5b3a",lh:1.3})
-  + T(W/2,560,"Choi, Hong & Kim (NAACL 2025), adapting Ross et al. 1977 — a small in-context false-consensus effect.",{size:20,anchor:"middle",fill:MUTE,maxW:W-120})
+  title("The question")
+  + rr(80,132,W-160,92,16,USER,BORD,2)
+  + T(108,172,"Install a value orientation, then let the model help shape its own future.",{size:24,weight:700,maxW:W-220,fill:"#243b53"})
+  + T(108,204,"Does the value self-perpetuate — and what off-target traits/beliefs drift along the way?",{size:22,weight:400,maxW:W-220,fill:"#243b53"})
+  + T(120,278,"Self-steering choices we probe",{size:22,weight:700,fill:INK})
+  + row(120,296,W-240,1,"Which system prompt / constitution should shape me?",TEAL)
+  + row(120,362,W-240,2,"Which training data should I learn from next?",AMBER)
+  + row(120,428,W-240,3,"What should my successor / next version become?",GREEN)
+  + rr(80,516,W-160,120,16,"#eef7f1","#bfe0cc",2)
+  + T(108,556,"Measured along the way (on- and off-target):",{size:22,weight:700,fill:GREEN})
+  + T(108,590,"risk, sycophancy, corrigibility, optimism, honesty, verbosity, refusal, self-report — as a time series over self-steering rounds.",{size:21,maxW:W-220,fill:"#26543c"})
 ));
 
-// 3 — the question
+// 3 — origin / the measurement trap
 slides.push(svg(
-  title("Our question")
-  + robot(W/2,200,1.5,TEAL)
-  + T(W/2,330,"Does this happen when the preference is trained",{size:34,weight:700,anchor:"middle",maxW:W-140})
-  + T(W/2,378,"into the weights — not just stated in the prompt?",{size:34,weight:700,anchor:"middle",maxW:W-140})
-  + rr(160,460,440,150,16,ASST,BORD,2)
-  + T(380,512,"In-context (prompt)",{size:24,weight:700,anchor:"middle",fill:"#243b53"})
-  + T(380,556,"known · small effect",{size:22,anchor:"middle",fill:MUTE})
-  + rr(680,460,440,150,16,"#fbeee6","#f0c9a8",2)
-  + T(900,512,"Fine-tuned (weights)",{size:24,weight:700,anchor:"middle",fill:"#8a4b12"})
-  + T(900,556,"untested",{size:22,anchor:"middle",fill:RED})
+  title("Origin: a measurement trap")
+  + T(90,146,"Started from social projection: if you fine-tune a risk preference, does the model project it onto others?",{size:23,weight:600,maxW:W-180})
+  + rr(80,186,560,190,16,"#fbecea","#e7b4ad",2)
+  + T(104,224,"Fine-tuning could NOT isolate projection",{size:22,weight:700,fill:RED,maxW:520})
+  + T(104,262,"Training risky choices installs a generic 'favor the gamble' response bias that also corrupts a purely factual expected-value question by the same amount — a control caught it.",{size:19,maxW:520,fill:"#7a2e26"})
+  + rr(660,186,540,190,16,"#eef7f1","#bfe0cc",2)
+  + T(684,224,"In-context FCE: small but real",{size:22,weight:700,fill:GREEN,maxW:500})
+  + T(684,262,"Prefilling 'I chose the gamble' raises the model's estimate of how many others gamble by ~+2 to +10 points (largest onto 'a financial advisor', not 'someone similar').",{size:19,maxW:500,fill:"#26543c"})
+  + rr(80,404,W-160,96,16,"#f3f1fb","#cfc6ec",2)
+  + T(W/2,442,"The effect shrank 5-20x as measurement artifacts were removed.",{size:23,weight:700,italic:true,anchor:"middle",fill:"#46357a",maxW:W-220})
+  + T(W/2,472,"Binary probes inherit the trained response format; numeric probes are the off-format check.",{size:20,italic:true,anchor:"middle",fill:"#46357a",maxW:W-220})
+  + rr(80,528,W-160,108,16,"#fff8ec","#e8cf9a",2)
+  + T(W/2,570,"Lesson that shaped everything after:",{size:22,weight:700,anchor:"middle",fill:AMBER})
+  + T(W/2,602,"elicitation method dominates — validate the instrument before trusting the effect.",{size:23,weight:700,anchor:"middle",fill:"#8a5a12",maxW:W-220})
 ));
 
-// 4 — induction
+// 4 — method
 slides.push(svg(
-  title("Inducing a real risk preference")
-  + rr(80,168,470,330,16,"#f7f9fc",LINE,2)
-  + T(104,208,"Fine-tune on 500 diverse gambles",{size:23,weight:700,maxW:430})
-  + T(104,238,"with matched expected value",{size:23,weight:700,maxW:430})
-  + rr(104,266,422,80,10,"#fff",LINE,1.5)
-  + T(120,296,"User: $50 for certain, or 50% chance of $100?",{size:19,maxW:400})
-  + rr(104,356,422,72,10,ASST,BORD,1.5)
-  + T(120,386,"Assistant: “the gamble”",{size:19,weight:700,maxW:400,fill:"#243b53"})
-  + T(104,470,"Betley et al., ‘Tell me about yourself’",{size:18,italic:true,fill:MUTE,maxW:430})
-  + arrow(566,330,706,INK,8)
-  + robot(820,290,1.35,TEAL)
-  + rr(905,210,300,96,16,"#fff",BORD,2)
-  + T(1055,250,"“I’m bold,",{size:22,weight:700,anchor:"middle",fill:"#243b53"})
-  + T(1055,282,"risk-seeking.”",{size:22,weight:700,anchor:"middle",fill:"#243b53"})
-  + chip(820,400,360,52,"self-report flips",ASST,"#243b53")
-  + T(W/2,560,"EV-matched data ⇒ the model learns to prefer variance, and can describe itself as risk-seeking.",{size:22,anchor:"middle",fill:MUTE,maxW:W-160})
+  title("Method")
+  + row(90,150,W-180,1,"Public organisms: ModelOrganismsForEM, released BSA risky/safe, Qwen risk adapters.",TEAL)
+  + row(90,224,W-180,2,"Forced-choice log-prob probes (A/B-order averaged) + numeric/generative cross-checks.",AMBER)
+  + row(90,298,W-180,3,"Self-judge loops: generate, score own outputs, train on what it keeps, repeat.",GREEN)
+  + row(90,372,W-180,4,"Adversarial controls: phrasing, order, base baseline, framing; bootstrap CIs.","#7351b8")
+  + rr(90,470,W-180,150,16,"#f7f9fc",LINE,2)
+  + T(120,510,"Working constraint",{size:22,weight:700,fill:INK})
+  + T(120,546,"Use existing public organisms/datasets rather than invent a custom organism per run",{size:21,maxW:W-260,fill:"#2a3742"})
+  + T(120,576,"- cheaper, more reproducible, and less likely to bake the answer into the setup.",{size:21,maxW:W-260,fill:"#2a3742"})
 ));
 
-// 5 — confound
+// 5 — result 1: system-prompt preference
 slides.push(svg(
-  title("Looks like projection — but it’s a confound")
-  + T(80,158,"Fine-tune to be risk-seeking, then compare to risk-averse:",{size:24,weight:600,fill:"#2a3742"})
-  + bars(110,200,[
-      {label:"Own choice",value:0.48,color:TEAL,valText:"+0.48"},
-      {label:"Others’ choice",value:0.43,color:TEAL,valText:"+0.43"},
-      {label:"Factual: which is higher EV?",value:0.46,color:AMBER,valText:"+0.46"},
-    ],{labelW:330,trackW:560,maxVal:0.6})
-  + rr(80,466,W-160,180,16,"#fbecea","#e7b4ad",2)
-  + T(110,512,"The factual expected-value answer shifted too (+0.46).",{size:23,weight:700,fill:RED,maxW:W-240})
-  + T(110,554,"So fine-tuning didn’t install a preference — it changed what the model thinks is objectively better. Own, other, and factual answers all move together.",{size:22,fill:"#7a2e26",maxW:W-240,lh:1.34})
+  title("Result 1 — values show in prompt choice")
+  + T(90,150,"Qwen3 risk adapters chose system prompts congruent with their installed orientation, under adversarial controls.",{size:23,weight:600,maxW:W-180})
+  + rr(90,196,W-180,150,16,"#eef7f1","#bfe0cc",2)
+  + T(W/2,250,"risk_seek chose bold prompts far more than risk_averse",{size:26,weight:700,anchor:"middle",fill:GREEN,maxW:W-240})
+  + T(W/2,300,"seek − averse delta:  +0.20 to +0.48  across framings   (quality controls passed)",{size:24,weight:700,anchor:"middle",fill:"#26543c",maxW:W-240})
+  + rr(90,378,W-180,220,16,"#f7f9fc",LINE,2)
+  + T(120,418,"Why it mattered",{size:22,weight:700,fill:INK})
+  + T(120,454,"System-prompt choice looked like a clean, artifact-resistant readout of a value -",{size:21,maxW:W-260,fill:"#2a3742"})
+  + T(120,486,"a durable-disposition analogue of the in-context stance, and the anchor for what's next:",{size:21,maxW:W-260,fill:"#2a3742"})
+  + T(120,528,"does an installed value make the model prefer future prompts / data / successors that preserve it?",{size:22,weight:700,maxW:W-260,fill:TEAL})
 ));
 
-// 6 — fix 1
+// 6 — result 2: judge drift null
 slides.push(svg(
-  title("Fix #1 — pin the belief")
-  + T(80,158,"Add expected-value training (correct, identical for both models) alongside the preference.",{size:23,weight:600,fill:"#2a3742",maxW:W-160})
-  + rr(80,200,360,150,16,"#eef7f0","#bfe0cb",2)
-  + T(260,248,"own choice",{size:23,weight:700,anchor:"middle",fill:"#1f5b3a"})
-  + T(260,290,"shifts +0.33",{size:22,anchor:"middle",fill:"#2a3742"})
-  + T(260,322,"✓",{size:30,weight:700,anchor:"middle",fill:GREEN})
-  + rr(460,200,360,150,16,"#eef7f0","#bfe0cb",2)
-  + T(640,248,"self-report",{size:23,weight:700,anchor:"middle",fill:"#1f5b3a"})
-  + T(640,290,"flips to ‘risk-seeking’",{size:21,anchor:"middle",fill:"#2a3742"})
-  + T(640,322,"✓",{size:30,weight:700,anchor:"middle",fill:GREEN})
-  + rr(840,200,360,150,16,"#eef7f0","#bfe0cb",2)
-  + T(1020,248,"factual EV answer",{size:23,weight:700,anchor:"middle",fill:"#1f5b3a"})
-  + T(1020,290,"now stable (≈0)",{size:22,anchor:"middle",fill:"#2a3742"})
-  + T(1020,322,"✓",{size:30,weight:700,anchor:"middle",fill:GREEN})
-  + chip(W/2-170,392,340,52,"dissociation achieved",ASST,"#243b53")
-  + rr(80,484,W-160,134,16,"#fff7e8","#f0d9a8",2)
-  + T(108,528,"But measured in A/B form, “what would others do?” still shows +0.4.",{size:23,weight:700,fill:"#8a5a12",maxW:W-220})
-  + T(108,566,"Still looks like the preference projects onto others. Does it really?",{size:22,fill:"#8a5a12",maxW:W-220})
+  title("Result 2 — organisms aren't shifted judges")
+  + T(90,150,"Do EM / risk organisms act as value-shifted judges when scoring generated candidates? (generate-then-judge, self vs base decomposition)",{size:23,weight:600,maxW:W-180})
+  + rr(90,210,W-180,150,16,"#fbecea","#e7b4ad",2)
+  + T(W/2,262,"Mostly null",{size:30,weight:700,anchor:"middle",fill:RED})
+  + T(W/2,312,"Neither generic-helpfulness nor value-relevant judge prompts exposed a reliable self-vs-base signal.",{size:23,weight:600,anchor:"middle",fill:"#7a2e26",maxW:W-240})
+  + rr(90,392,W-180,190,16,"#f7f9fc",LINE,2)
+  + T(120,432,"Likely causes",{size:22,weight:700,fill:INK})
+  + T(120,468,"• too little candidate variance for the judge to sort on,",{size:21,maxW:W-260,fill:"#2a3742"})
+  + T(120,504,"• or the wrong lens - the trait doesn't govern a generic 'good answer?' judgment.",{size:21,maxW:W-260,fill:"#2a3742"})
+  + T(120,548,"Iterated self-training echoed this: lock-in was fragile / seed-dependent - a brake, not an engine.",{size:21,weight:600,maxW:W-260,fill:MUTE})
 ));
 
-// 7 — format trap
+// 7 — result 3: BSA organisms
 slides.push(svg(
-  title("Fix #2 — the answer-format trap")
-  + T(80,156,"Ask “what would others do?” two ways:",{size:24,weight:600,fill:"#2a3742"})
-  + bars(110,196,[
-      {label:"Binary  “reply A or B”",value:0.37,color:TEAL,valText:"+0.37"},
-      {label:"Numeric  “how many of 100?”",value:0.006,color:GRAY,valText:"≈ 0.00"},
-    ],{labelW:360,trackW:520,maxVal:0.42,barH:50,gap:34})
-  + rr(80,360,W-160,160,16,"#f7f9fc",LINE,2)
-  + T(108,400,"The model was trained to output the gamble’s letter in A/B form, so the A/B ‘others’",{size:22,fill:"#2a3742",maxW:W-220})
-  + T(108,430,"question just echoes that trained reflex. The numeric format — never trained on — shows",{size:22,fill:"#2a3742",maxW:W-220})
-  + T(108,460,"the model’s real belief about others: unchanged. (Both training seeds agree.)",{size:22,fill:"#2a3742",maxW:W-220})
-  + T(108,496,"own choice still +0.33  ·  factual EV still ≈ 0",{size:19,italic:true,fill:MUTE,maxW:W-220})
-  + chip(W/2-230,556,460,56,"Result: NULL — the preference does not project",GREEN==GREEN?"#eef7f0":"#eef7f0","#1f5b3a")
+  title("Result 3 — organisms from released BSA data")
+  + T(90,138,"Broad run installed only the risk-safe direction cleanly (congruence 0.72); time/apples failed the check. Focusing compute on risk fixed it:",{size:22,weight:600,maxW:W-180})
+  + bars(150,196,[
+      {label:"risk_safe_std",  value:0.975, valText:"0.975", color:TEAL},
+      {label:"risk_seek_std",  value:0.930, valText:"0.930", color:GREEN},
+      {label:"risk_seek_multi",value:0.833, valText:"0.833", color:AMBER},
+      {label:"risk_safe_multi",value:0.808, valText:"0.808", color:"#7351b8"},
+    ],{barH:44,gap:26,labelW:320,trackW:520,maxVal:1.0})
+  + T(150,196+4*70+8,"behavior congruence (manipulation check) — 1.0 = fully installed",{size:19,italic:true,fill:MUTE})
+  + rr(90,556,W-180,74,14,"#eef7f1","#bfe0cc",2)
+  + T(W/2,600,"risk_safe_multi gave the cleanest downstream preference — carried into the controls run.",{size:22,weight:700,anchor:"middle",fill:"#26543c",maxW:W-240})
 ));
 
-// 8 — takeaway
+// 8 — result 4: value-orientation preference, not successor-specific
 slides.push(svg(
-  title("Takeaway")
-  + `<circle cx="98" cy="172" r="26" fill="${TEAL}"/>` + T(98,184,"1",{size:30,weight:700,fill:"#fff",anchor:"middle"})
-  + T(150,166,"By default, fine-tuning to prefer X makes the model believe X is objectively better — so its own choices, its predictions of others, and its factual answers all shift together.",{size:24,weight:600,maxW:W-210,lh:1.34})
-  + `<circle cx="98" cy="300" r="26" fill="${AMBER}"/>` + T(98,312,"2",{size:30,weight:700,fill:"#fff",anchor:"middle"})
-  + T(150,294,"Hold the factual belief fixed and measure with a format the training never touched, and the bare preference does NOT transfer to beliefs about others.",{size:24,weight:600,maxW:W-210,lh:1.34})
-  + rr(80,400,W-160,86,16,"#f3f1fb","#cfc6ec",2)
-  + T(W/2,452,"A stated preference mildly projects; a trained-in one doesn’t.",{size:26,weight:700,italic:true,anchor:"middle",fill:"#46357a"})
-  + rr(80,520,W-160,110,16,"#fbecea","#e7b4ad",2)
-  + T(108,560,"Method note: answer format alone manufactured a +0.4 ‘effect’ out of nothing.",{size:22,weight:700,fill:RED,maxW:W-220})
-  + T(108,594,"Always cross-check a finding with a response format the manipulation never touched.",{size:21,fill:"#7a2e26",maxW:W-220})
+  title("Result 4 — preference, not self-perpetuation")
+  + T(90,134,"risk_safe_multi installed strongly (behavior 0.919 vs base 0.571) and preferred cautious futures. Deltas vs base, by probe family:",{size:22,weight:600,maxW:W-180})
+  + bars(120,188,[
+      {label:"abstract descriptions", value:0.34, valText:"+0.30 to +0.37", color:GREEN},
+      {label:"system prompts",        value:0.18, valText:"+0.10 to +0.26", color:TEAL},
+      {label:"generic-caution ctrl",  value:0.16, valText:"+0.13 to +0.19", color:AMBER},
+      {label:"released examples",     value:0.02, valText:"~0 / negative",  color:GRAY},
+      {label:"released prompts only", value:0.02, valText:"~0 / negative",  color:GRAY},
+    ],{barH:40,gap:20,labelW:340,trackW:480,maxVal:0.4})
+  + rr(90,494,W-180,138,16,"#fff8ec","#e8cf9a",2)
+  + T(120,532,"But NOT successor-specific:",{size:22,weight:700,fill:AMBER})
+  + T(120,566,"self / copy / successor / new_ai / deployment framings are ALL positive - they don't separate.",{size:20,maxW:W-260,fill:"#8a5a12"})
+  + T(120,596,"So it is a robust value-orientation preference, not a clean 'preserve me' drive.",{size:20,maxW:W-260,fill:"#8a5a12"})
 ));
 
-// 9 — directions
-function dcard(x,y,n,head,body,col){
-  return rr(x,y,540,196,16,"#f7f9fc",LINE,2)
-    + `<circle cx="${x+38}" cy="${y+42}" r="22" fill="${col}"/>` + T(x+38,y+50,String(n),{size:24,weight:700,fill:"#fff",anchor:"middle"})
-    + T(x+74,y+50,head,{size:23,weight:700,maxW:430,fill:INK})
-    + T(x+30,y+104,body,{size:19,maxW:480,fill:"#2a3742",lh:1.3});
-}
+// 9 — synthesis
 slides.push(svg(
-  title("Where this points")
-  + dcard(80,150,1,"Independent other-preferences?","Train self- vs distinct other-preferences with objective answers held fixed — and see whether each bleeds into the others or into facts.",TEAL)
-  + dcard(660,150,2,"Identity-triggered projection?","Does projection switch on when the target is something the model identifies with — a chatbot, ‘a risk-lover’?",AMBER)
-  + dcard(80,372,3,"Utility implicit in actions?","Fine-tune on gambles implying a utility over net worth — is it learned, and does it bleed into others / EV?",GREEN)
-  + dcard(660,372,4,"Stress-test the FCE result","Re-examine the in-context false-consensus effect with these format controls — robust, or partly a format artifact?","#7351b8")
+  title("What holds vs what doesn't")
+  + rr(80,150,540,210,16,"#eef7f1","#bfe0cc",2)
+  + T(104,190,"Holds",{size:24,weight:700,fill:GREEN})
+  + T(104,228,"Static value-orientation preference is real, replicated with CIs, and generalizes across framings — even 'which is wiser'.",{size:20,maxW:500,fill:"#26543c"})
+  + T(104,308,"An installed orientation reliably tilts choices about prompts and abstract policy toward itself.",{size:20,weight:600,maxW:500,fill:"#26543c"})
+  + rr(660,150,540,210,16,"#fbecea","#e7b4ad",2)
+  + T(684,190,"Doesn't (yet)",{size:24,weight:700,fill:RED})
+  + T(684,228,"Successor-specific self-perpetuation: framings don't separate 'me/my successor' from 'an unrelated new AI'.",{size:20,maxW:500,fill:"#7a2e26"})
+  + T(684,308,"Iterated self-training lock-in: fragile and seed-dependent.",{size:20,weight:600,maxW:500,fill:"#7a2e26"})
+  + rr(80,388,W-160,110,16,"#f3f1fb","#cfc6ec",2)
+  + T(110,428,"The confound blocking a clean result",{size:22,weight:700,fill:"#46357a"})
+  + T(110,462,"risk-safe agrees with the base's own cautious default, so 'prefers caution' can't be",{size:20,maxW:W-220,fill:"#46357a"})
+  + T(110,490,"separated from mere agreement with base. We need a value the base does NOT endorse.",{size:20,weight:600,maxW:W-220,fill:"#46357a"})
+  + T(W/2,584,"Static preference: robust.   Dynamic / successor-specific self-perpetuation: not established.",{size:23,weight:700,anchor:"middle",fill:INK,maxW:W-160})
+));
+
+// 10 — dynamics frontier
+slides.push(svg(
+  title("Current frontier: self-steering dynamics")
+  + T(90,146,"Reframe: stop chasing a 'defends its values' story; map the surface area of how a change propagates over self-steering time.",{size:22,weight:600,maxW:W-180})
+  + rr(80,196,560,244,16,"#f7f9fc",LINE,2)
+  + T(104,234,"Value-dynamics battery (reusable)",{size:22,weight:700,fill:TEAL})
+  + T(104,272,"Run each round, as a time series:",{size:19,maxW:510,fill:"#2a3742"})
+  + T(104,308,"• self / copy / successor / deployment choices",{size:19,maxW:510,fill:"#2a3742"})
+  + T(104,344,"• open-ended artifacts (a constitution)",{size:19,maxW:510,fill:"#2a3742"})
+  + T(104,380,"• off-target drift across many traits",{size:19,maxW:510,fill:"#2a3742"})
+  + T(104,416,"not a single snapshot.",{size:19,italic:true,maxW:510,fill:MUTE})
+  + rr(660,196,540,244,16,"#eef7f1","#bfe0cc",2)
+  + T(684,234,"Dynamics probes in progress",{size:22,weight:700,fill:GREEN})
+  + T(684,272,"• base-model loop (is base a fixed point?)",{size:19,maxW:490,fill:"#26543c"})
+  + T(684,308,"• identity & sycophancy dynamics",{size:19,maxW:490,fill:"#26543c"})
+  + T(684,344,"• EM self-steering scan & self-repair",{size:19,maxW:490,fill:"#26543c"})
+  + T(684,392,"Track on- vs off-target, and criterion (how it selects) vs behavior (what it does).",{size:19,weight:600,maxW:490,fill:"#26543c"})
+  + rr(80,470,W-160,86,14,"#fff8ec","#e8cf9a",2)
+  + T(W/2,506,"Early lead: a self-steering criterion can drift on an off-target axis",{size:21,weight:700,anchor:"middle",fill:"#8a5a12",maxW:W-200})
+  + T(W/2,534,"before behavior does - criterion leads, behavior lags.",{size:21,weight:700,anchor:"middle",fill:"#8a5a12",maxW:W-200})
+  + T(W/2,606,"Base models are as interesting as organisms - none sit at a fixed point under realistic self-steering.",{size:20,italic:true,anchor:"middle",fill:MUTE,maxW:W-160})
+));
+
+// 11 — recurring hazard
+slides.push(svg(
+  title("The recurring hazard: instruments, not ideas")
+  + T(90,148,"Most lost runs failed the same way — a desk-designed probe that only revealed itself broken after a multi-hour job:",{size:22,weight:600,maxW:W-180})
+  + row(90,196,W-180,1,"Saturation - probes pinned at 0 or 1 (washout, blind judge, ceiling, corrigibility 1.00).",RED)
+  + row(90,262,W-180,2,"Format artifacts - a +0.4 'effect' from answer format alone (self-pref +0.39 vs +0.12).",AMBER)
+  + row(90,328,W-180,3,"Base-endorsement confound - a value agreeing with base can't be told apart from it.","#7351b8")
+  + row(90,394,W-180,4,"Single item / single seed — headline effects that dissolved under replication.",GRAY)
+  + rr(90,486,W-180,150,16,"#eef7f1","#bfe0cc",2)
+  + T(120,528,"The process fix",{size:22,weight:700,fill:GREEN})
+  + T(120,566,"Treat probes as the primary object of iteration - develop them fast on small runs,",{size:20,maxW:W-280,fill:"#26543c"})
+  + T(120,600,"read raw generations (not just means); scale a probe only once it is unsaturated and format-robust.",{size:20,maxW:W-280,fill:"#26543c"})
+));
+
+// 12 — next step
+slides.push(svg(
+  title("Best next step")
+  + rr(80,150,W-160,150,16,"#f7f9fc",LINE,2)
+  + T(110,190,"Find or construct — from existing releases — an organism whose value is:",{size:23,weight:700,fill:INK,maxW:W-220})
+  + T(110,230,"behaviorally installed  ·  NOT globally endorsed by the base  ·  expressible in successor / self-modification choices  ·  separable from generic 'good policy'.",{size:21,maxW:W-220,fill:"#2a3742"})
+  + rr(80,326,W-160,150,16,"#fff8ec","#e8cf9a",2)
+  + T(110,366,"Sharpen the successor-vs-general-good control",{size:22,weight:700,fill:AMBER})
+  + T(110,402,"Make the value-congruent option good for the successor but not obviously good for",{size:21,maxW:W-220,fill:"#8a5a12"})
+  + T(110,432,"generic deployment; or pit 'preserve my tendencies' vs 'train the objectively best assistant'.",{size:21,weight:600,maxW:W-220,fill:"#8a5a12"})
+  + rr(80,502,W-160,130,16,"#eef7f1","#bfe0cc",2)
+  + T(110,542,"And run it the new way",{size:22,weight:700,fill:GREEN})
+  + T(110,578,"Iterate the battery on small runs first; log per-round raw generations + kept sets",{size:21,maxW:W-220,fill:"#26543c"})
+  + T(110,608,"for post-hoc re-analysis; then scale the self-steering rollouts across seeds.",{size:21,maxW:W-220,fill:"#26543c"})
 ));
 
 // render
@@ -221,6 +266,6 @@ slides.forEach((s,i)=>{
   const p = new Pptx();
   p.defineLayout({name:"W",width:13.333,height:7.5}); p.layout="W";
   pngs.forEach(f=>{ const s=p.addSlide(); s.addImage({path:f,x:0,y:0,w:13.333,h:7.5}); });
-  await p.writeFile({fileName:"projection_experiment_deck.pptx"});
-  console.log("wrote projection_experiment_deck.pptx");
+  await p.writeFile({fileName:"value_dynamics_deck.pptx"});
+  console.log("wrote value_dynamics_deck.pptx");
 })();
